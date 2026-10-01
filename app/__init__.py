@@ -15,7 +15,7 @@ def create_app():
 
     api = Api(app)
 
-    from app.models import User
+    from app.models import User,Transaction
 
     from app.routes import health_bp , auth_bp
 
