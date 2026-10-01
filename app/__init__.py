@@ -1,6 +1,6 @@
 from flask import Flask
 from config import Config
-from app.extensions import db, migrate
+from app.extensions import db, migrate,jwt
 
 
 def create_app():
@@ -10,10 +10,15 @@ def create_app():
 
     db.init_app(app)
     migrate.init_app(app, db)
+    jwt.init_app(app)
 
     from app.models import User
 
     from app.routes.health import health_bp
+    from app.routes.auth import auth_bp
+
     app.register_blueprint(health_bp)
+    app.register_blueprint(auth_bp)
+
 
     return app
