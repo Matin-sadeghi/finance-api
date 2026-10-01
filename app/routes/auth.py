@@ -35,8 +35,8 @@ class Login(MethodView):
         except InvalidCredentialsError:
             abort(401, message="Invalid email or password.")
 
-        access_token = create_access_token(identity=user.id)
-        refresh_token = create_refresh_token(identity=user.id)
+        access_token = create_access_token(identity=str(user.id))
+        refresh_token = create_refresh_token(identity=str(user.id))
 
         return {
             "message": "Login successful.",
