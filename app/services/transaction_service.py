@@ -17,3 +17,8 @@ def create_transaction(user_id :int , data:dict) -> Transaction:
     db.session.commit()
 
     return transaction
+
+def get_transactions_by_user(user_id: int):
+    transactions = Transaction.query.filter_by(user_id=user_id).all()
+    return transactions
+

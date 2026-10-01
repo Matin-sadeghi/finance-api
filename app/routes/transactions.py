@@ -2,7 +2,7 @@ from flask.views import MethodView
 from flask_smorest import Blueprint
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.schemas import TransactionSchema, TransactionCreateSchema
-from app.services import create_transaction
+from app.services import create_transaction , get_transactions_by_user
 
 
 
@@ -19,3 +19,13 @@ class TransactionList(MethodView):
         user_id = get_jwt_identity()
         transaction = create_transaction(user_id=int(user_id), data=data)
         return transaction
+
+    @transaction_bp.doc(security=[{"BearerAuth": []}])
+    @jwt_required()
+    @transaction_bp.response(200, TransactionSchema(many=True))
+    def get(self):
+        """Get all transactions for the current user."""
+        user_id = get_jwt_identity()
+        transactions = get_transactions_by_user(user_id=int(user_id))
+        return transactions
+    
