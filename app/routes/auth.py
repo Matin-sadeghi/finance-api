@@ -4,9 +4,9 @@ from flask_jwt_extended import (create_access_token,create_refresh_token,jwt_req
 from werkzeug.security import generate_password_hash,check_password_hash
 
 from app.extensions import db
-from app.models import User
+from app.models import User, user
 from app.schemas import UserSchema,LoginSchema,AuthSchema,RegisterSchema,TokenSchema
-
+from app.services.auth_service import register_user,login_user
 auth_bp = Blueprint("auth",__name__,url_prefix="/api/v1/auth",description="Authentication endpoints")
 
 
@@ -17,15 +17,10 @@ class Register(MethodView):
     def post(self,data):
         """Register a new user."""
 
-        email = data["email"].lower().strip()
-
-        if User.query.filter_by(email=email).first():
-            return {"message": "Email already exists."}, 409
-
-        user = User(email=email, password=generate_password_hash(data["password"]))
-
-        db.session.add(user)
-        db.session.commit()
+        user = register_user(data["email"].lower().strip(), data["password"])
+        if user is None:
+            return {"message": "User with this email already exists."}, 409
+        
         return user
 
 @auth_bp.route("/login")
@@ -35,10 +30,10 @@ class Login(MethodView):
     def post(self,data):
         """Login a user and return access and refresh tokens."""
 
-        email = data["email"].lower().strip()
-        user = User.query.filter_by(email=email).first()
+        user = login_user(data["email"].lower().strip(), data["password"])
 
-        if not user or not check_password_hash(user.password, data["password"]):
+        
+        if user is None:
             return {"message": "Invalid email or password."}, 401
 
         access_token = create_access_token(identity=user.id)
