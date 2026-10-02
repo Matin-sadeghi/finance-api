@@ -27,3 +27,9 @@ def get_transaction(user_id:int , transaction_id:int):
     return transaction
 
 
+
+def update_transaction(transaction: Transaction, data: dict) -> Transaction:
+    for key, value in data.items():
+        setattr(transaction, key, value)
+    db.session.commit()
+    return transaction

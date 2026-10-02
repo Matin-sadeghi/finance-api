@@ -1,8 +1,8 @@
 from flask.views import MethodView
 from flask_smorest import Blueprint,abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.schemas import TransactionSchema, TransactionCreateSchema
-from app.services import create_transaction , get_transactions_by_user , get_transaction
+from app.schemas import TransactionSchema, TransactionCreateSchema,TransactionUpdateSchema
+from app.services import create_transaction , get_transactions_by_user , get_transaction,update_transaction
 
 
 
@@ -41,5 +41,20 @@ class TransactionDetail(MethodView):
 
         if tranasction is None:
             abort(404,message="Transaction not found")
-            
+
         return tranasction
+
+    @transaction_bp.doc(security=[{"BearerAuth": []}])
+    @jwt_required()
+    @transaction_bp.arguments(TransactionUpdateSchema)
+    @transaction_bp.response(200, TransactionSchema)
+    def patch(self,data,transaction_id ):
+
+        user_id = get_jwt_identity()
+        transaction = get_transaction(user_id,transaction_id)
+
+        if transaction is None:
+            abort(404,message="Transaction not found")
+
+        updated_transaction = update_transaction(transaction, data)
+        return updated_transaction  
