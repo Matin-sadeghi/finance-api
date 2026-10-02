@@ -33,3 +33,7 @@ def update_transaction(transaction: Transaction, data: dict) -> Transaction:
         setattr(transaction, key, value)
     db.session.commit()
     return transaction
+
+def delete_transaction(transaction:Transaction)->None:
+    db.session.delete(transaction)
+    db.session.commit()
