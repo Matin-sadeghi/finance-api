@@ -24,3 +24,22 @@ class TransactionUpdateSchema(Schema):
     category = fields.String(required=False, validate=validate.Length(min=1, max=50))
     description = fields.String(required=False, allow_none=True, validate=validate.Length(max=255))
     date = fields.Date(required=False)
+
+
+class TransactionQuerySchema(Schema):
+    type = fields.String(required=False, validate=validate.OneOf(["income", "expense"]))
+    category = fields.String(required=False, validate=validate.Length(min=1, max=50))
+    start_date = fields.Date(required=False)
+    end_date = fields.Date(required=False)
+    page = fields.Int(required=False, load_default=1, validate=validate.Range(min=1))
+    per_page = fields.Int(required=False, load_default=10, validate=validate.Range(min=1, max=100))
+
+
+class TransactionPaginationSchema(Schema):
+    total = fields.Int()
+    pages = fields.Int()
+    page = fields.Int()
+    per_page = fields.Int()
+    items = fields.List(fields.Nested(TransactionSchema))
+
+

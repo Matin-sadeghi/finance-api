@@ -1,14 +1,14 @@
 from flask.views import MethodView
 from flask_smorest import Blueprint,abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.schemas import TransactionSchema, TransactionCreateSchema,TransactionUpdateSchema
+from app.schemas import TransactionSchema, TransactionCreateSchema,TransactionUpdateSchema,TransactionQuerySchema,TransactionPaginationSchema
 from app.services import create_transaction , get_transactions_by_user , get_transaction,update_transaction,delete_transaction
 
 
 
 transaction_bp = Blueprint("Transactions", __name__, url_prefix="/api/v1/transactions", description="Transaction endpoints")
 
-@transaction_bp.route("/")
+@transaction_bp.route("")
 class TransactionList(MethodView):
     @transaction_bp.doc(security=[{"BearerAuth": []}])
     @jwt_required()
@@ -22,12 +22,19 @@ class TransactionList(MethodView):
 
     @transaction_bp.doc(security=[{"BearerAuth": []}])
     @jwt_required()
-    @transaction_bp.response(200, TransactionSchema(many=True))
-    def get(self):
+    @transaction_bp.arguments(TransactionQuerySchema, location="query")
+    @transaction_bp.response(200, TransactionPaginationSchema)
+    def get(self,args):
         """Get all transactions for the current user."""
         user_id = get_jwt_identity()
-        transactions = get_transactions_by_user(user_id=int(user_id))
-        return transactions
+        paginatiom = get_transactions_by_user(user_id=int(user_id),filters=args)
+        return {
+            "items":paginatiom.items,
+            "page":paginatiom.page,
+            "per_page":paginatiom.per_page,
+            "total":paginatiom.total,
+            "pages":paginatiom.pages
+        }
 
 @transaction_bp.route("/<int:transaction_id>")
 class TransactionDetail(MethodView):
