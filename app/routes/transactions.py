@@ -1,8 +1,8 @@
 from flask.views import MethodView
-from flask_smorest import Blueprint
+from flask_smorest import Blueprint,abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.schemas import TransactionSchema, TransactionCreateSchema
-from app.services import create_transaction , get_transactions_by_user
+from app.services import create_transaction , get_transactions_by_user , get_transaction
 
 
 
@@ -28,4 +28,18 @@ class TransactionList(MethodView):
         user_id = get_jwt_identity()
         transactions = get_transactions_by_user(user_id=int(user_id))
         return transactions
-    
+
+@transaction_bp.route("/<int:transaction_id>")
+class TransactionDetail(MethodView):
+    @transaction_bp.doc(security=[{"BearerAuth": []}])
+    @jwt_required()
+    @transaction_bp.response(200, TransactionSchema)
+    def get(self,transaction_id):
+        user_id = get_jwt_identity()
+
+        tranasction = get_transaction(user_id,transaction_id)
+
+        if tranasction is None:
+            abort(404,message="Transaction not found")
+            
+        return tranasction
